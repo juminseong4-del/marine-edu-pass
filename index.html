@@ -82,7 +82,7 @@ html,body{overflow-x:hidden}
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = "https://ouvbmumjdhuuhejnhcmj.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://ouvbmumjdhuuhejnhcmj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_JxRxNMk49-71jE7RYaTlGQ_GyjzNYYK";
 
 const supabaseClient = window.supabase.createClient(
@@ -162,7 +162,7 @@ function addRecord(){
   if(!v)return toast("교육명을 입력해주세요.");
   data.push({name:v,date:"직접 기록",done:true,selected:[],url:""});
   newName.value="";
-  save();render();renderRecords();renderOpinions();
+  save();render();renderRecords();loadOpinions();
   toast("수료 기록을 추가했습니다.");
 }
 function deleteRecord(i){
@@ -173,22 +173,60 @@ function deleteRecord(i){
   toast("수료 기록을 삭제했습니다.");
 }
 
-let opinions=JSON.parse(localStorage.getItem("marineOpinions")||"[]");
+let opinions=[];
+
+async function loadOpinions(){
+  const {data,error}=await supabaseClient
+    .from("opinions")
+    .select("id,author,text,created_at")
+    .order("created_at",{ascending:false});
+
+  if(error){
+    console.error(error);
+    toast("의견을 불러오지 못했습니다.");
+    return;
+  }
+
+  const rows=data||[];
+  opinions=rows.map(o=>({
+    id:o.id,
+    author:o.author||"사용자",
+    text:o.text,
+    date:o.created_at,
+    comments:[]
+  }));
+
+  for(const o of opinions){
+    const {data:comments,error:commentError}=await supabaseClient
+      .from("opinion_comments")
+      .select("id,author,text,created_at")
+      .eq("opinion_id",o.id)
+      .order("created_at",{ascending:true});
+
+    if(!commentError){
+      o.comments=(comments||[]).map(c=>({
+        id:c.id,
+        author:c.author||"댓글",
+        text:c.text,
+        date:c.created_at
+      }));
+    }
+  }
+
+  renderOpinions();
+}
 
 function renderOpinions(){
   const box=document.getElementById("opinionList");
   if(!box)return;
+
   if(!opinions.length){
     box.innerHTML='<div class="opEmpty">아직 등록된 개선 의견이 없습니다.</div>';
     return;
   }
+
   box.innerHTML=opinions.map((o,i)=>{
     const comments=o.comments||[];
-    // 기존 reply 데이터가 있으면 첫 댓글로 자동 변환
-    if(!comments.length && o.reply){
-      comments.push({author:"관리자",text:o.reply,date:""});
-      o.comments=comments;
-    }
     return `<div class="opThread">
       <div class="opHead">
         <span class="opAuthor">#${String(opinions.length-i).padStart(2,"0")}</span>
@@ -198,7 +236,10 @@ function renderOpinions(){
       <button class="commentCount" onclick="toggleComments(${i})">댓글 ${comments.length}개</button>
       <div id="commentArea-${i}" class="commentArea" style="display:${comments.length?'block':'none'}">
         ${comments.map(c=>`<div class="comment">
-          <div class="commentHead"><b>${escapeRecord(c.author||"관리자")}</b><span>${escapeRecord(c.date||"")}</span></div>
+          <div class="commentHead">
+            <b>${escapeRecord(c.author||"댓글")}</b>
+            <span>${escapeRecord(c.date||"")}</span>
+          </div>
           <div>${escapeRecord(c.text||"")}</div>
         </div>`).join("")}
         <div class="commentForm">
@@ -212,39 +253,75 @@ function renderOpinions(){
     </div>`;
   }).join("");
 }
+
 function toggleComments(i){
   const el=document.getElementById("commentArea-"+i);
   if(el)el.style.display=(el.style.display==="none"?"block":"none");
 }
-function addComment(i){
+
+async function sendOpinion(){
+  const text=op.value.trim();
+  if(!text)return toast("의견을 입력해주세요.");
+
+  const {error}=await supabaseClient
+    .from("opinions")
+    .insert({author:"사용자",text:text});
+
+  if(error){
+    console.error(error);
+    toast("의견 등록에 실패했습니다.");
+    return;
+  }
+
+  op.value="";
+  await loadOpinions();
+  toast("개선 의견이 등록되었습니다.");
+}
+
+async function addComment(i){
   const input=document.getElementById("commentInput-"+i);
   const text=(input?.value||"").trim();
   if(!text)return toast("댓글을 입력해주세요.");
-  opinions[i].comments=opinions[i].comments||[];
-  opinions[i].comments.push({
-    author: "댓글",
-    text,
-    date:new Date().toLocaleString("ko-KR")
-  });
-  localStorage.setItem("marineOpinions",JSON.stringify(opinions));
-  renderOpinions();
+
+  const opinionId=opinions[i]?.id;
+  if(!opinionId)return toast("의견을 찾을 수 없습니다.");
+
+  const {error}=await supabaseClient
+    .from("opinion_comments")
+    .insert({
+      opinion_id:opinionId,
+      author:"댓글",
+      text:text
+    });
+
+  if(error){
+    console.error(error);
+    toast("댓글 등록에 실패했습니다.");
+    return;
+  }
+
+  await loadOpinions();
   toast("댓글이 등록되었습니다.");
 }
-function sendOpinion(){
-  const text=op.value.trim();
-  const author="사용자";
-  if(!text)return toast("의견을 입력해주세요.");
-  opinions.unshift({author,text,date:new Date().toLocaleString("ko-KR"),comments:[]});
-  localStorage.setItem("marineOpinions",JSON.stringify(opinions));
-  op.value="";
-  renderOpinions();
-  toast("개선 의견이 등록되었습니다.");
-}
-function deleteOpinion(i){
+
+async function deleteOpinion(i){
+  const id=opinions[i]?.id;
+  if(!id)return;
+
   if(!confirm("이 의견을 삭제할까요?"))return;
-  opinions.splice(i,1);
-  localStorage.setItem("marineOpinions",JSON.stringify(opinions));
-  renderOpinions();
+
+  const {error}=await supabaseClient
+    .from("opinions")
+    .delete()
+    .eq("id",id);
+
+  if(error){
+    console.error(error);
+    toast("의견 삭제에 실패했습니다.");
+    return;
+  }
+
+  await loadOpinions();
   toast("의견을 삭제했습니다.");
 }
 

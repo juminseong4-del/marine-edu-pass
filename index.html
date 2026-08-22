@@ -80,7 +80,16 @@ html,body{overflow-x:hidden}
 
 </div>
 <div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "여기에_네_Supabase_API_URL";
+const SUPABASE_KEY = "여기에_아까_복사한_sb_publishable_키";
 
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+</script>
 <script>
 const PRIVACY_URL="https://edu.privacy.go.kr/user/course/uCrsRcmdList.do";
 const UNIEDU_URL="https://www.uniedu.go.kr/uniedu/home/cms/page/uniedu/main.do?mid=SM00000865";

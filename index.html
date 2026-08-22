@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#8f1020"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.webmanifest">
+<title>해병대 교육 통합관리 시스템</title>
+<style>
+*{box-sizing:border-box}
+:root{--green:#8f1020;--light:#f8e8eb;--mint:#efd0d5;--text:#2d2426;--muted:#806f73;--line:#eadde0}
+body{margin:0;background:#f3eeee;font-family:Arial,"Noto Sans KR",sans-serif;color:var(--text)}
+.app{width:min(100%,460px);margin:auto;background:#fbf7f8;min-height:100vh;box-shadow:0 0 24px #234d4020}
+.header{background:white;padding:16px 17px 10px;border-bottom:1px solid var(--line)}
+.top{display:flex;justify-content:space-between;align-items:flex-start}.brand{font-size:13px;font-weight:700;color:#876f73}.brand strong{display:block;font-size:23px;color:#8f1020;margin-top:3px}.percent{text-align:right;color:#8f1020;font-size:28px;font-weight:900;line-height:1}.percent small{display:block;font-size:10px;font-weight:600;margin-top:5px;color:#799187}
+.progressText{display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:#7d676c}.bar{height:5px;background:#eee2e4;border-radius:5px;margin-top:5px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:#8f1020}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:white;border-bottom:1px solid var(--line);padding:7px 14px}.tab{border:0;background:white;padding:11px 5px;border-radius:9px;color:#604c50;font-weight:800;font-size:13px}.tab.active{background:#f6e4e7}
+.section{padding:18px 15px}.sectionTitle{display:flex;align-items:center;gap:7px;color:#754e55;font-weight:800;font-size:12px;margin:3px 5px 10px}.sectionTitle .num{width:22px;height:22px;background:#f5e1e5;border-radius:50%;display:grid;place-items:center;font-size:11px}.line{height:1px;background:#dce9e4;flex:1}.up{font-size:11px}
+.card{background:white;border:1px solid #e0ebe7;border-radius:13px;padding:12px 12px 11px;margin:8px 0;box-shadow:0 3px 10px #326c5912;transition:.18s}.card.doneCard{background:#e8f4ef;border-color:#c4ddd3;animation:donePulse .22s ease-out}@keyframes donePulse{from{transform:scale(.99);opacity:.85}to{transform:scale(1);opacity:1}}.card.doneCard .name{text-decoration:line-through;color:#7b8582}.card.doneCard .tag{background:#dff0e9;color:#43846d}.card.doneCard .actions{justify-content:center}.card.doneCard .tag{opacity:.9}
+.row{display:grid;grid-template-columns:30px 1fr 104px;gap:8px;align-items:start}.check{width:27px;height:27px;border:2px solid #d9a6af;border-radius:50%;background:white;cursor:pointer;margin-top:4px}.check.done{background:#8f1020;border-color:#8f1020;position:relative}.check.done:after{content:"✓";color:white;position:absolute;left:5px;top:2px;font-size:16px;font-weight:bold}.name{font-size:14px;font-weight:800;margin-top:3px}.tag{display:inline-block;background:#f5e1e5;color:#8f1020;border-radius:4px;padding:3px 6px;font-size:10px;margin-top:6px}.date{float:right;background:#f9eadf;color:#a35d31;padding:4px 6px;border-radius:5px;font-size:10px}
+.rednote{font-size:10px;color:#b52232;font-weight:700;margin-top:5px}.greenNote{font-size:10px;color:#95626b;margin-top:5px}
+.actions{display:flex;flex-direction:column;gap:6px;justify-content:center}.actions button{width:100%;border-radius:9px;padding:10px 4px;font-weight:800;font-size:12px}.study{border:0;background:#8f1020;color:white;box-shadow:0 3px 7px #650b162d}.complete{margin-top:6px;border:1px solid #d9b9bf;background:white;color:#7d5960}.completeBtn{border:0!important;background:#3f67a2!important;color:white!important;box-shadow:0 3px 7px #31548630}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:7px 0 0 35px}.choice{border:1px dashed #c99ca5;background:white;border-radius:7px;padding:7px;font-size:10px;color:#80555d;transition:.15s}.choice.selected{background:#8f1020;border-color:#8f1020;color:#fff;font-weight:800}
+.panel{display:none}.panel.active{display:block}
+html,body{overflow-x:hidden}
+.app{touch-action:pan-y}
+.tabs{touch-action:pan-y}
+@media(max-width:460px){
+  .panel{animation:panelIn .18s ease-out}
+  @keyframes panelIn{from{opacity:.65;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+}
+.recordBox,.opinionBox{background:white;border:1px solid var(--line);border-radius:13px;padding:15px}.recordBox input,.opinionBox textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;margin:8px 0;font:inherit}.btn{border:0;border-radius:8px;padding:10px 14px;background:var(--green);color:white;font-weight:800}
+.notice{font-size:11px;color:#806f73;line-height:1.6;margin-top:14px}
+
+
+.recordItem{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #eadde0;font-size:12px}.recordItem .rname{flex:1;font-weight:700}.recordDelete{border:1px solid #d9b9bf;background:#fff;color:#8f1020;border-radius:7px;padding:6px 9px;font-size:11px;font-weight:800} .opThread{border:1px solid #eadde0;border-radius:11px;background:#fff;margin-top:10px;padding:11px}.opHead{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#806f73}.opAuthor{font-weight:800;color:#321c20}.opText{font-size:12px;line-height:1.55;margin:8px 0;white-space:pre-wrap}.opReply{background:#f8e8eb;border-left:3px solid #8f1020;border-radius:7px;padding:9px;margin-top:8px}.opReplyTitle{font-size:10px;font-weight:800;color:#8f1020}.opReplyText{font-size:12px;line-height:1.5;margin-top:4px;white-space:pre-wrap}.opEmpty{font-size:11px;color:#806f73;padding:12px 0}.opActions{display:flex;gap:6px}.opDelete{border:1px solid #d9b9bf;background:#fff;color:#8f1020;border-radius:7px;padding:6px 9px;font-size:10px;font-weight:800}.toast{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#321c20;color:#fff;padding:10px 15px;border-radius:9px;font-size:12px;z-index:5}
+@media(min-width:461px){body{padding:20px 0}.app{border-radius:18px;overflow:hidden}}
+
+.commentCount{float:right;border:1px solid #c8ddd5;background:#fff;border-radius:8px;padding:6px 9px;color:#3f8069;font-size:10px;font-weight:800}
+.commentArea{clear:both;margin-top:12px;padding-top:10px;border-top:1px solid #dce9e4}
+.comment{background:#e8f4ef;border-radius:9px;padding:9px 10px;margin:7px 0;font-size:11px;line-height:1.55}
+.commentHead{display:flex;gap:7px;align-items:center;margin-bottom:3px}
+.commentHead b{color:#397b66;font-size:10px}.commentHead span{color:#806f73;font-size:9px}
+.commentForm{display:flex;gap:6px;margin-top:8px}
+.commentForm input{flex:1;min-width:0;padding:9px;border:1px solid #dce9e4;border-radius:8px;font:inherit}
+.commentForm button{border:0;border-radius:8px;background:#37906f;color:white;font-weight:800;padding:0 12px}
+.opThread{overflow:hidden}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+<div class="top"><div class="brand">해병대 교육 통합관리 시스템<strong>MARINE EDU-PASS</strong></div><div class="percent"><span id="pct">0%</span><small>이수율</small></div></div>
+<div class="progressText"><span id="count">0 / 10개 기준 완료</span><span>진행 중</span></div><div class="bar"><i id="bar"></i></div>
+</header>
+
+<nav class="tabs">
+<button class="tab active" onclick="tab('edu',this)">교육 목록</button>
+<button class="tab" onclick="tab('record',this)">기록변경</button>
+<button class="tab" onclick="tab('opinion',this)">개선 의견</button>
+</nav>
+
+<main id="edu" class="panel active section">
+<div class="sectionTitle"><span class="num">1</span> 법정 필수 및 인권 교육 <span class="line"></span><span class="up">▲</span></div>
+<div id="list"></div>
+<div class="notice">※ 성인지 교육은 원격교육·소집교육을 모두 선택해야 수료됩니다.<br>※ 자살예방교육은 전반기·후반기를 모두 선택해야 수료됩니다.<br>※ 개인정보 보호 교육은 개인정보배움터로 연결됩니다.<br>※ 통일교육은 통일부 국립평화통일민주교육원으로 연결됩니다.</div>
+</main>
+
+<section id="record" class="panel section">
+<div class="recordBox"><h3>기록변경</h3><p style="font-size:12px;color:#806f73">교육명을 입력하면 수료 기록으로 추가할 수 있습니다.</p><input id="newName" placeholder="교육명 입력"><button class="btn" onclick="addRecord()">수료 기록 추가</button><div id="recordList" style="margin-top:14px"></div></div>
+</section>
+
+<section id="opinion" class="panel section">
+<div class="opinionBox">
+<h3>개선 의견</h3>
+<p style="font-size:12px;color:#806f73">교육과 관련된 개선 의견을 남겨주세요. 내가 보낸 의견과 답변을 이곳에서 확인할 수 있습니다.</p>
+<textarea id="op" rows="5" placeholder="개선 의견을 입력해주세요."></textarea>
+<button class="btn" onclick="sendOpinion()">의견 제출</button>
+<div id="opinionList" style="margin-top:16px"></div>
+</div>
+</section>
+
+</div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://ouvbmumjdhuuhejnhcmj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_JxRxNMk49-71jE7RYaTlGQ_GyjzNYYK";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+</script>
+<script>
+const PRIVACY_URL="https://edu.privacy.go.kr/user/course/uCrsRcmdList.do";
+const UNIEDU_URL="https://www.uniedu.go.kr/uniedu/home/cms/page/uniedu/main.do?mid=SM00000865";
+const base=[
+{name:"성인지 교육 (국방부)",date:"3/16 ~ 12/31",note:"원격·소집교육 모두 수강해야 이수 완료됩니다",choices:["원격교육","소집교육"]},
+{name:"자살사고예방교육 (생명사랑)",date:"",note:"전반기 신청·수강 2/16 ~ 6/30",note2:"후반기 신청·수강 7/1 ~ 12/31",red:"전반기·후반기 각각 수강해야 이수 완료됩니다",choices:["전반기","후반기"]},
+{name:"개인정보 보호 교육",date:"연중",privacy:true,note:"개인정보배움터 추천 교육과정에서 교육을 선택해 수강하세요."},
+{name:"통일교육",date:"연중",unification:true,note:"통일부 국립평화통일민주교육원에서 교육과정을 선택해 수강하세요."},
+{name:"청렴교육",date:"매월 1~25일",red:"'청렴' 검색 → 학습시간 확인 후 선택",complete:true},
+{name:"사이버 인권 교육",date:"1/1 ~ 12/31",complete:true},
+{name:"장애인 인식 개선 교육",date:"1/1 ~ 12/31"},
+{name:"아동학대 예방 교육",date:"1/6 ~ 12/31"}
+];
+let data=JSON.parse(localStorage.getItem("marineLike")||"null")||base.map(x=>({...x,done:false,selected:x.choices?x.choices.map(()=>false):[]}));
+data=data.map(x=>({...x,url:x.url||"",selected:x.selected||(x.choices?x.choices.map(()=>false):[])}));
+
+// Always follow the current base order while preserving saved completion/selection state.
+const orderMap=new Map(base.map((x,i)=>[x.name,i]));
+data.sort((a,b)=>(orderMap.get(a.name)??999)-(orderMap.get(b.name)??999));
+
+function render(){
+ list.innerHTML="";
+ data.forEach((x,i)=>{
+   const d=document.createElement("div");d.className="card"+(x.done?" doneCard":"");
+   const studyButton = x.done ? `` : (
+     x.privacy
+     ? `<button class="study" onclick="openPrivacy()">수강하기</button>`
+     : x.unification
+     ? `<button class="study" onclick="openUniedu()">수강하기</button>`
+     : `<button class="study" onclick="openNhi(${JSON.stringify(x.url)})">수강하기</button>`);
+const completeButton = x.choices
+     ? ``
+     : `<button class="${x.done?'study completeBtn':'complete'}" onclick="toggle(${i})">${x.done?"✓ 수강완료":"수강완료"}</button>`;
+   d.innerHTML=`<div class="row">
+   <button class="check ${x.done?'done':''}" aria-label="수료 상태" onclick="toggle(${i})"></button>
+   <div><div class="name">${x.name}</div><span class="tag">${x.privacy?"개인정보배움터":x.unification?"국립평화통일민주교육원":"나라배움터"}</span>${x.date?`<span class="date">${x.date}</span>`:""}${x.note?`<div class="greenNote">${x.note}</div>`:""}${x.note2?`<div class="greenNote">${x.note2}</div>`:""}${x.red?`<div class="rednote">⚠ ${x.red}</div>`:""}</div>
+   <div class="actions">${studyButton}${completeButton}</div>
+   </div>${x.choices?`<div class="choices">${x.choices.map((c,j)=>`<button class="choice ${x.selected&&x.selected[j]?"selected":""}" onclick="selectChoice(${i},${j})">${x.selected&&x.selected[j]?"✓ ":""}${c}${x.selected&&x.selected[j]?"완료":""}</button>`).join("")}</div>`:""}</div>`;
+   list.appendChild(d);
+ });update();
+}
+function selectChoice(i,j){
+  if(!data[i].selected) data[i].selected=data[i].choices.map(()=>false);
+  data[i].selected[j]=!data[i].selected[j];
+  data[i].done=data[i].selected.length>0 && data[i].selected.every(Boolean);
+  save();render();
+  toast(data[i].selected[j]?"선택 완료":"선택 취소");
+}
+function toggle(i){data[i].done=!data[i].done;save();render();toast(data[i].done?"수료 처리되었습니다.":"수료 처리가 취소되었습니다.")}
+function update(){let n=data.filter(x=>x.done).length,total=data.length,p=total?Math.round(n/total*100):0;pct.textContent=p+"%";count.textContent=n+" / "+total+"개 기준 완료";bar.style.width=p+"%"}
+function save(){localStorage.setItem("marineLike",JSON.stringify(data))}
+function openPrivacy(){window.open(PRIVACY_URL,"_blank","noopener,noreferrer")}
+function openUniedu(){window.open(UNIEDU_URL,"_blank","noopener,noreferrer")}
+function openNhi(url){window.open(url||"https://mnd.nhi.go.kr/","_blank","noopener,noreferrer")}
+function tab(id,b){document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");}
+function renderRecords(){
+  const box=document.getElementById("recordList");
+  if(!box)return;
+  const records=data.map((x,i)=>({x,i})).filter(({x})=>x.date==="직접 기록");
+  if(!records.length){
+    box.innerHTML='<div style="font-size:11px;color:#806f73;padding-top:10px">직접 추가한 수료 기록이 없습니다.</div>';
+    return;
+  }
+  box.innerHTML='<div style="font-size:11px;color:#806f73;margin-bottom:5px">직접 추가한 기록</div>'+
+    records.map(({x,i})=>`<div class="recordItem"><span class="rname">${escapeRecord(x.name)}</span><button class="recordDelete" onclick="deleteRecord(${i})">삭제</button></div>`).join("");
+}
+function escapeRecord(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function addRecord(){
+  let v=newName.value.trim();
+  if(!v)return toast("교육명을 입력해주세요.");
+  data.push({name:v,date:"직접 기록",done:true,selected:[],url:""});
+  newName.value="";
+  save();render();renderRecords();loadOpinions();
+  toast("수료 기록을 추가했습니다.");
+}
+function deleteRecord(i){
+  if(data[i]?.date!=="직접 기록")return;
+  if(!confirm("이 수료 기록을 삭제할까요?"))return;
+  data.splice(i,1);
+  save();render();renderRecords();loadOpinions();
+  toast("수료 기록을 삭제했습니다.");
+}
+
+let opinions=[];
+
+async function loadOpinions(){
+  const {data,error}=await supabaseClient
+    .from("opinions")
+    .select("id,author,text,created_at")
+    .order("created_at",{ascending:false});
+
+  if(error){
+    console.error(error);
+    toast("의견을 불러오지 못했습니다.");
+    return;
+  }
+
+  const rows=data||[];
+  opinions=rows.map(o=>({
+    id:o.id,
+    author:o.author||"사용자",
+    text:o.text,
+    date:o.created_at,
+    comments:[]
+  }));
+
+  for(const o of opinions){
+    const {data:comments,error:commentError}=await supabaseClient
+      .from("opinion_comments")
+      .select("id,author,text,created_at")
+      .eq("opinion_id",o.id)
+      .order("created_at",{ascending:true});
+
+    if(!commentError){
+      o.comments=(comments||[]).map(c=>({
+        id:c.id,
+        author:c.author||"댓글",
+        text:c.text,
+        date:c.created_at
+      }));
+    }
+  }
+
+  renderOpinions();
+}
+
+function renderOpinions(){
+  const box=document.getElementById("opinionList");
+  if(!box)return;
+
+  if(!opinions.length){
+    box.innerHTML='<div class="opEmpty">아직 등록된 개선 의견이 없습니다.</div>';
+    return;
+  }
+
+  box.innerHTML=opinions.map((o,i)=>{
+    const comments=o.comments||[];
+    return `<div class="opThread">
+      <div class="opHead">
+        <span class="opAuthor">#${String(opinions.length-i).padStart(2,"0")}</span>
+        <span>${escapeRecord(o.date||"")}</span>
+      </div>
+      <div class="opText">${escapeRecord(o.text)}</div>
+      <button class="commentCount" onclick="toggleComments(${i})">댓글 ${comments.length}개</button>
+      <div id="commentArea-${i}" class="commentArea" style="display:${comments.length?'block':'none'}">
+        ${comments.map(c=>`<div class="comment">
+          <div class="commentHead">
+            <b>${escapeRecord(c.author||"댓글")}</b>
+            <span>${escapeRecord(c.date||"")}</span>
+          </div>
+          <div>${escapeRecord(c.text||"")}</div>
+        </div>`).join("")}
+        <div class="commentForm">
+          <input id="commentInput-${i}" placeholder="댓글을 입력하세요">
+          <button onclick="addComment(${i})">등록</button>
+        </div>
+      </div>
+      <div class="opActions" style="margin-top:8px">
+        <button class="opDelete" onclick="deleteOpinion(${i})">내 의견 삭제</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function toggleComments(i){
+  const el=document.getElementById("commentArea-"+i);
+  if(el)el.style.display=(el.style.display==="none"?"block":"none");
+}
+
+async function sendOpinion(){
+  const text=op.value.trim();
+  if(!text)return toast("의견을 입력해주세요.");
+
+  const {error}=await supabaseClient
+    .from("opinions")
+    .insert({author:"사용자",text:text});
+
+  if(error){
+    console.error(error);
+    toast("의견 등록에 실패했습니다.");
+    return;
+  }
+
+  op.value="";
+  await loadOpinions();
+  toast("개선 의견이 등록되었습니다.");
+}
+
+async function addComment(i){
+  const input=document.getElementById("commentInput-"+i);
+  const text=(input?.value||"").trim();
+  if(!text)return toast("댓글을 입력해주세요.");
+
+  const opinionId=opinions[i]?.id;
+  if(!opinionId)return toast("의견을 찾을 수 없습니다.");
+
+  const {error}=await supabaseClient
+    .from("opinion_comments")
+    .insert({
+      opinion_id:opinionId,
+      author:"댓글",
+      text:text
+    });
+
+  if(error){
+    console.error(error);
+    toast("댓글 등록에 실패했습니다.");
+    return;
+  }
+
+  await loadOpinions();
+  toast("댓글이 등록되었습니다.");
+}
+
+async function deleteOpinion(i){
+  const id=opinions[i]?.id;
+  if(!id)return;
+
+  if(!confirm("이 의견을 삭제할까요?"))return;
+
+  const {error}=await supabaseClient
+    .from("opinions")
+    .delete()
+    .eq("id",id);
+
+  if(error){
+    console.error(error);
+    toast("의견 삭제에 실패했습니다.");
+    return;
+  }
+
+  await loadOpinions();
+  toast("의견을 삭제했습니다.");
+}
+
+// Supabase Realtime: refresh shared opinions/comments when another device changes them.
+if (typeof supabaseClient !== "undefined") {
+  supabaseClient
+    .channel("marine-edu-shared-opinions")
+    .on("postgres_changes", {event:"*", schema:"public", table:"opinions"}, () => loadOpinions())
+    .on("postgres_changes", {event:"*", schema:"public", table:"opinion_comments"}, () => loadOpinions())
+    .subscribe();
+}
+
+function toast(t){let x=document.getElementById("toast");x.textContent=t;x.style.display="block";setTimeout(()=>x.style.display="none",2000)}
+
+// 화면을 좌우로 밀어서 탭(교육 목록 → 기록변경 → 개선 의견)을 넘길 수 있습니다.
+(function(){
+  const app=document.querySelector(".app");
+  const tabButtons=Array.from(document.querySelectorAll(".tabs .tab"));
+  if(!app || !tabButtons.length)return;
+
+  let startX=0,startY=0,moved=false;
+
+  app.addEventListener("touchstart",e=>{
+    if(!e.touches || e.touches.length!==1)return;
+    const t=e.target;
+    if(t.closest("input,textarea,button,a,select"))return;
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    moved=false;
+  },{passive:true});
+
+  app.addEventListener("touchmove",e=>{
+    if(!e.touches || e.touches.length!==1)return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=e.touches[0].clientY-startY;
+    if(Math.abs(dx)>12 && Math.abs(dx)>Math.abs(dy))moved=true;
+  },{passive:true});
+
+  app.addEventListener("touchend",e=>{
+    if(!moved || !e.changedTouches || !e.changedTouches.length)return;
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=e.changedTouches[0].clientY-startY;
+    if(Math.abs(dx)<55 || Math.abs(dx)<=Math.abs(dy))return;
+
+    const activeIndex=Math.max(0,tabButtons.findIndex(b=>b.classList.contains("active")));
+    const nextIndex=dx<0
+      ? Math.min(tabButtons.length-1,activeIndex+1)
+      : Math.max(0,activeIndex-1);
+
+    if(nextIndex!==activeIndex){
+      tabButtons[nextIndex].click();
+    }
+  },{passive:true});
+})();
+
+render();renderRecords();renderOpinions();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script></body>
+</html>

@@ -266,27 +266,33 @@ function toggleComments(i){
 async function sendOpinion(){
   const text=op.value.trim();
   if(!text)return toast("의견을 입력해주세요.");
+async function sendOpinion() {
+  const input = document.getElementById("opinionInput");
+  const text = input.value.trim();
 
-  const {error}=await supabaseClient
-    .from("의견")
-    .insert({
-      작성자:"사용자",
-      콘텐츠:text
-    });
-
-  if(error){
-    console.error("의견 등록 오류:",error);
-    toast("의견 등록에 실패했습니다.");
+  if (!text) {
+    alert("의견을 입력해주세요.");
     return;
   }
 
-  op.value="";
-  await loadOpinions();
-  toast("개선 의견이 등록되었습니다.");
-}
+  const { error } = await supabaseClient
+    .from("opinions")
+    .insert([
+      {
+        content: text,
+        author: "사용자"
+      }
+    ]);
 
-async function addComment(i){
-  const input=document.getElementById("commentInput-"+i);
+  if (error) {
+    console.error("의견 등록 오류:", error);
+    alert("의견 등록에 실패했습니다.\n" + error.message);
+    return;
+  }
+
+  input.value = "";
+  alert("의견이 등록되었습니다.");
+  renderOpinions();
   const text=(input?.value||"").trim();
   if(!text)return toast("댓글을 입력해주세요.");
 

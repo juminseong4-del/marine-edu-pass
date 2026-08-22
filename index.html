@@ -962,7 +962,7 @@ async function loadOpinions(){
   const result =
     await supabaseClient
       .from("의견")
-      .select("id, created_at, 콘텐츠, 작성자")
+      .select("id,created_at,콘텐츠,작가")
       .order("created_at", {ascending:false});
 
   if(result.error){

@@ -942,7 +942,7 @@ function deleteRecord(i){
 
 /* =====================================================
    의견 기능
-   Supabase 테이블: 의견
+   Supabase 테이블: opinions
    컬럼: id, created_at, 콘텐츠, 작가
 ===================================================== */
 
@@ -961,7 +961,7 @@ async function loadOpinions(){
 
   const result =
     await supabaseClient
-      .from("의견")
+      .from("opinions")
       .select("id, created_at, 콘텐츠, 작가")
       .order("created_at", {ascending:false});
 
@@ -1067,14 +1067,13 @@ async function sendOpinion(){
 
   const result =
     await supabaseClient
-      .from("의견")
+      .from("opinions")
       .insert([
         {
           콘텐츠:text,
           작가:"사용자"
         }
-      ])
-      .select();
+      ]);
 
   if(result.error){
 
@@ -1112,7 +1111,7 @@ async function deleteOpinion(i){
 
   const result =
     await supabaseClient
-      .from("의견")
+      .from("opinions")
       .delete()
       .eq("id", opinion.id);
 
@@ -1148,7 +1147,7 @@ supabaseClient
     {
       event:"*",
       schema:"public",
-      table:"의견"
+      table:"opinions"
     },
     function(){
       loadOpinions();

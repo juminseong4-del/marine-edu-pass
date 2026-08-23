@@ -343,6 +343,13 @@ body{
 </head>
 
 <body>
+<script>
+// 이전 버전의 Service Worker가 오래된 index.html을 계속 보여주는 문제 방지
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(()=>{});
+  if (window.caches) caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(()=>{});
+}
+</script>
 <div class="app">
 
 <header class="header">
@@ -942,7 +949,7 @@ function deleteRecord(i){
 
 /* =====================================================
    의견 기능
-   Supabase 테이블: opinions
+   Supabase 테이블: 의견
    컬럼: id, created_at, 콘텐츠, 작가
 ===================================================== */
 
@@ -961,7 +968,7 @@ async function loadOpinions(){
 
   const result =
     await supabaseClient
-      .from("opinions")
+      .from("의견")
       .select("id, created_at, 콘텐츠, 작가")
       .order("created_at", {ascending:false});
 
@@ -1067,13 +1074,14 @@ async function sendOpinion(){
 
   const result =
     await supabaseClient
-      .from("opinions")
+      .from("의견")
       .insert([
         {
           콘텐츠:text,
           작가:"사용자"
         }
-      ]);
+      ])
+      .select();
 
   if(result.error){
 
@@ -1111,7 +1119,7 @@ async function deleteOpinion(i){
 
   const result =
     await supabaseClient
-      .from("opinions")
+      .from("의견")
       .delete()
       .eq("id", opinion.id);
 
@@ -1147,7 +1155,7 @@ supabaseClient
     {
       event:"*",
       schema:"public",
-      table:"opinions"
+      table:"의견"
     },
     function(){
       loadOpinions();

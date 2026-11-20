@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7dce8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>달빛 - 생리 주기 기록</title>
+<style>
+:root{--ink:#25252b;--muted:#85838d;--line:#eceaf0;--paper:#fbfaf8;--white:#fff;--plum:#78628f;--plum-soft:#eee9f3;--rose:#c9879d;--rose-soft:#f5e8ed;--sage:#7e9888;--sage-soft:#eaf0eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif;letter-spacing:-.025em}
+.app{max-width:1200px;margin:auto;padding:34px 28px 64px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:43px;height:43px;border-radius:15px;background:#e9e2ed;display:grid;place-items:center;font-size:22px}.brand h1{font-size:20px;letter-spacing:-.05em;margin:0;font-weight:800}.brand small{color:var(--muted);font-size:11px;letter-spacing:.01em}
+.pill{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 12px;color:#77717d;font-size:11px}
+.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:20px;align-items:start}
+.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:21px;box-shadow:0 5px 22px rgba(38,30,45,.025)}
+.hero{background:#eee9f3;border:0;min-height:205px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.hero:after{content:"";position:absolute;width:210px;height:210px;border:1px solid rgba(120,98,143,.13);border-radius:50%;right:-65px;top:25px;box-shadow:0 0 0 24px rgba(120,98,143,.035),0 0 0 48px rgba(120,98,143,.025)}
+.eyebrow{font-size:11px;color:#796b86;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.hero h2{font-size:25px;letter-spacing:-.055em;margin:10px 0 5px;font-weight:800}.hero p{margin:0;color:#746c7c;font-size:13px;line-height:1.6}
+.big{font-size:46px;font-weight:800;letter-spacing:-.07em;color:#675477;position:relative;z-index:1}.big span{font-size:13px;font-weight:650;letter-spacing:-.02em}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 16px}.section-title h3{font-size:15px;letter-spacing:-.04em;margin:0;font-weight:800}.muted{color:var(--muted);font-size:11px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.stat{background:#faf9fb;border:1px solid #f0edf2;border-radius:14px;padding:12px 10px}.stat b{display:block;font-size:17px;letter-spacing:-.04em}.stat span{font-size:10px;color:var(--muted)}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.month{font-size:17px;font-weight:800;letter-spacing:-.04em}.nav{border:1px solid var(--line);background:#fff;border-radius:10px;width:32px;height:32px;color:#655a6d;font-size:18px;cursor:pointer}
+.week,.days{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:5px}.week div{font-size:10px;color:#a09ba4;padding:7px 0}.day{height:42px;display:grid;place-items:center;border-radius:12px;font-size:12px;color:#4d4951;position:relative}.day.empty{opacity:0}.day.period{background:#f1dce4;color:#965e76;font-weight:800}.day.fertile{background:#e9efe9;color:#5f806c}.day.ovulation{outline:1.5px solid #789481;font-weight:800}.day.today{box-shadow:inset 0 0 0 1.5px #8b759d;font-weight:800}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:13px;font-size:10px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}.pink{background:#e7b8c9}.purple{background:#c7d8ca}.outline{background:white;border:1.5px solid #789481}
+form{display:grid;gap:12px}label{display:block;font-size:11px;color:#6f6973;margin-bottom:6px;font-weight:700}input,select,textarea{width:100%;border:1px solid #e9e6eb;border-radius:11px;padding:11px 12px;background:#fdfcfd;color:var(--ink);font:inherit;font-size:13px}input:focus,select:focus,textarea:focus{outline:2px solid #e6dce9;border-color:transparent}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:0;border-radius:11px;padding:12px 15px;background:#78628f;color:white;font-weight:750;font-size:13px;cursor:pointer}.btn.secondary{background:#f0edf3;color:#655673}.btn.danger{background:#f8edef;color:#a66b7e}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.records{display:grid;gap:8px}.record{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;justify-content:space-between;gap:10px;align-items:center}.record b{font-size:12px}.record small{display:block;color:var(--muted);margin-top:4px;font-size:10px;line-height:1.5}.record button{border:0;background:#f8edef;color:#a66b7e;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:11px}
+.notice{font-size:10px;line-height:1.7;color:#89838e;background:#f8f7f9;border-radius:11px;padding:11px;margin-top:13px}.full{grid-column:1/-1}.empty-state{text-align:center;color:var(--muted);font-size:12px;padding:18px}
+@media(max-width:720px){.app{padding:17px 13px 36px}.grid{grid-template-columns:1fr;gap:12px}.full{grid-column:auto}.card{padding:17px;border-radius:17px}.top{margin-bottom:17px}.hero{min-height:180px}.hero h2{font-size:23px}.big{font-size:42px}.day{height:40px}.pill{font-size:10px;padding:7px 9px}}
+@media(max-width:420px){.dialog{width:min(90%,390px);padding:24px 18px}.profile-nav{padding:9px 11px}}
+@media(max-width:360px){.app{padding:13px 9px}.card{padding:14px}.day{height:35px;font-size:11px}.stats{gap:5px}.stat{padding:10px 7px}}
+
+.profile-summary{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.profile-summary p{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+.edit-link{border:1px solid #e9e4ed;background:#f7f4f8;color:#675477;border-radius:10px;padding:9px 12px;font-weight:750;font-size:11px;white-space:nowrap;cursor:pointer}
+.day.sex{position:relative}.day.sex:after{content:"♥";position:absolute;bottom:1px;font-size:8px;color:#bd7891;line-height:1}
+.profile-nav{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;color:#675477;font-weight:750;font-size:12px;cursor:pointer;box-shadow:0 3px 12px rgba(38,30,45,.035)}
+.profile-nav-icon{width:22px;height:22px;border-radius:8px;background:#f0edf3;display:grid;place-items:center;font-size:13px}
+.dialog-backdrop{position:fixed;inset:0;background:rgba(35,29,39,.38);display:none;align-items:stretch;justify-content:flex-end;padding:0;z-index:20}
+.dialog-backdrop.open{display:flex}
+.dialog{width:min(100%,430px);height:100%;overflow-y:auto;background:#fff;border-radius:22px 0 0 22px;padding:28px 23px;box-shadow:0 20px 60px rgba(30,20,40,.18);animation:slideIn .22s ease}
+@keyframes slideIn{from{transform:translateX(35px);opacity:.6}to{transform:translateX(0);opacity:1}}
+.dialog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.dialog-close{border:0;background:#f3f0f4;border-radius:10px;width:36px;height:36px;font-size:19px;color:#6c6272;cursor:pointer}
+.profile-field{background:#faf9fb;border:1px solid #f0edf2;border-radius:14px;padding:14px;margin-bottom:12px}
+.profile-field label{margin-bottom:8px}
+.profile-field input{background:white}
+.profile-help{font-size:11px;color:var(--muted);line-height:1.7;margin-top:16px;background:#f8f7f9;padding:13px;border-radius:12px}
+.dialog h2{font-size:19px;margin:0 0 6px;letter-spacing:-.04em}.dialog p{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 18px}
+.dialog-actions{display:flex;gap:8px;margin-top:16px}.dialog-actions>*{flex:1}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#302b34;color:#fff;padding:11px 16px;border-radius:99px;font-size:12px;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}.toast.show{opacity:1}
+
+.side-profile{position:fixed!important;left:18px;top:145px;z-index:15;display:flex;flex-direction:column;align-items:center;gap:7px;padding:13px 10px!important;border:1px solid #e8e2ec!important;border-radius:15px!important;background:#fff!important;color:#665575!important;box-shadow:0 5px 20px rgba(38,30,45,.07);cursor:pointer}
+.side-profile .profile-nav-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:#eee9f3;font-size:16px}
+@media(max-width:1100px){.side-profile{left:8px;top:125px;padding:10px 8px!important}}
+@media(max-width:720px){.side-profile{left:auto;right:12px;top:auto;bottom:14px;flex-direction:row;padding:10px 14px!important;border-radius:99px!important;box-shadow:0 6px 24px rgba(38,30,45,.16)}.side-profile .profile-nav-icon{width:25px;height:25px}}
+
+.profile-section{margin-top:25px;padding-top:20px;border-top:1px solid var(--line)}
+.profile-section h3{font-size:14px;margin:0 0 6px}
+.profile-section>p{font-size:11px;color:var(--muted);line-height:1.6;margin:0 0 12px}
+.period-record{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:9px;margin-bottom:7px}
+.period-record input{min-width:0;padding:8px;font-size:12px}
+.period-record button{border:0;border-radius:9px;padding:8px 9px;font-size:11px;cursor:pointer}
+.period-record .save-date{background:#eee9f3;color:#675477}.period-record .delete-date{background:#f8edef;color:#a66b7e}
+@media(max-width:420px){.period-record{grid-template-columns:1fr auto auto;gap:5px}.period-record input{padding:7px 5px}}
+
+/* 안정적인 PC 배치: 내 정보 버튼은 헤더 오른쪽에 배치 */
+.side-profile{position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;z-index:auto;flex-direction:row!important;align-items:center;gap:8px;padding:10px 14px!important;border:1px solid var(--line)!important;border-radius:12px!important;background:#fff!important;box-shadow:0 3px 12px rgba(38,30,45,.04)!important}
+.side-profile .profile-nav-icon{width:26px;height:26px}
+@media(min-width:721px){.app{padding-top:38px}.top{margin-bottom:28px}.hero{min-height:230px}.card{padding:24px}.day{height:48px;font-size:13px}.week div{padding:10px 0}.calendar-head{margin-bottom:16px}}
+@media(max-width:720px){.app{padding:17px 13px 84px}.side-profile{position:fixed!important;right:14px!important;left:auto!important;bottom:14px!important;top:auto!important;z-index:15;box-shadow:0 6px 24px rgba(38,30,45,.16)!important}}
+
+/* 모바일 화면 최적화 */
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+button,input,select,textarea{font:inherit; touch-action:manipulation;}
+button{ -webkit-tap-highlight-color:transparent; }
+@media(max-width:720px){
+  body{min-width:320px;}
+  .app{width:100%;max-width:560px;margin:0 auto;padding:18px 14px calc(100px + env(safe-area-inset-bottom));}
+  .top{align-items:center;gap:10px;margin-bottom:16px;}
+  .brand{gap:10px;min-width:0;}
+  .brand h1{font-size:19px;}
+  .brand small{font-size:10px;}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:13px;}
+  .card{width:100%;min-width:0;padding:17px;border-radius:18px;}
+  .hero{min-height:176px;padding:19px;}
+  .hero h2{font-size:22px;line-height:1.35;}
+  .hero p{font-size:12px;}
+  .big{font-size:40px;}
+  .calendar-head{margin-bottom:10px;}
+  .month{font-size:16px;}
+  .nav{width:40px;height:40px;font-size:21px;}
+  .week,.days{gap:3px;}
+  .week div{font-size:11px;padding:8px 0;}
+  .day{height:clamp(39px,11vw,48px);border-radius:11px;font-size:13px;}
+  .legend{gap:8px 12px;font-size:10px;}
+  .side-profile{position:fixed!important;right:16px!important;left:auto!important;top:auto!important;bottom:calc(14px + env(safe-area-inset-bottom))!important;z-index:19;min-height:50px;padding:10px 16px!important;border-radius:999px!important;background:#fff!important;box-shadow:0 5px 22px rgba(38,30,45,.18)!important;}
+  .side-profile .profile-nav-icon{width:27px;height:27px;}
+  .dialog-backdrop{padding:0;align-items:stretch;}
+  .dialog{width:100%;height:100%;max-height:100dvh;border-radius:0;padding:calc(20px + env(safe-area-inset-top)) 17px calc(24px + env(safe-area-inset-bottom));}
+  .dialog-top{position:sticky;top:0;background:#fff;padding:2px 0 12px;margin-bottom:15px;z-index:2;}
+  .profile-field{padding:13px;}
+  .row2{grid-template-columns:minmax(0,1fr) auto;gap:8px;}
+  .row2 .btn{padding:11px 13px;white-space:nowrap;}
+  .period-record{grid-template-columns:minmax(0,1fr) auto auto;}
+  .period-record input{width:100%;min-width:0;}
+  .toast{bottom:calc(76px + env(safe-area-inset-bottom));max-width:calc(100vw - 30px);text-align:center;}
+}
+@media(max-width:380px){
+  .app{padding-left:10px;padding-right:10px;}
+  .card{padding:14px;}
+  .hero{padding:16px;}
+  .day{height:37px;font-size:12px;}
+  .legend{font-size:9px;gap:7px;}
+  .period-record{gap:4px;padding:7px;}
+  .period-record button{padding:8px 7px;font-size:10px;}
+}
+
+
+.date-edit-backdrop{position:fixed;inset:0;background:rgba(35,29,39,.38);display:none;align-items:center;justify-content:center;padding:16px;z-index:25}
+.date-edit-backdrop.open{display:flex}
+.date-edit-panel{width:min(100%,390px);background:#fff;border-radius:20px;padding:22px;box-shadow:0 18px 55px rgba(30,20,40,.2)}
+.date-edit-panel h3{font-size:17px;margin:0 0 7px;letter-spacing:-.04em}
+.date-edit-panel p{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 17px}
+.date-edit-panel label{margin-bottom:7px}
+.date-edit-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+.date-edit-actions .btn{padding:12px 9px}
+.date-edit-close{float:right;border:0;background:#f3f0f4;border-radius:9px;width:32px;height:32px;font-size:18px;color:#6c6272;cursor:pointer}
+.date-edit-delete{width:100%;margin-top:9px}
+@media(max-width:720px){.date-edit-panel{padding:20px 17px;border-radius:18px}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="logo">🌷</div><div><h1>달빛</h1><small>나를 위한 주기 기록</small></div></div>
+    <button class="profile-nav side-profile" id="openProfile" type="button"><span class="profile-nav-icon">⚙</span><span>내 정보</span></button>
+  </header>
+
+  <main class="grid">
+    <section class="card hero">
+      <div><div class="eyebrow">다음 생리 예상</div><h2 id="heroTitle">기록을 시작해 주세요</h2><p id="heroSub">최근 생리 시작일을 입력하면 주기를 계산해요.</p></div>
+      <div class="big" id="countdown">— <span>일</span></div>
+    </section>
+
+
+
+    <section class="card">
+      <div class="calendar-head"><button class="nav" id="prev">‹</button><div class="month" id="monthLabel"></div><button class="nav" id="next">›</button></div>
+      <div class="week"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+      <div class="days" id="days"></div>
+      <div class="legend"><span><i class="dot pink"></i>생리 기록/예상</span><span><i class="dot purple"></i>가임기 추정</span><span><i class="dot outline"></i>배란일 추정</span></div>
+    </section>
+
+
+
+
+
+
+  </main>
+</div>
+<div class="dialog-backdrop" id="profileDialog" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+  <aside class="dialog">
+    <div class="dialog-top"><div><h2 id="profileTitle">내 정보 수정하기</h2><p style="margin:6px 0 0">나의 생리 주기를 설정해 주세요.</p></div><button class="dialog-close" id="cancelProfile" type="button" aria-label="닫기">×</button></div>
+    <div class="profile-field" style="background:#f1edf4"><b id="profileCycle" style="font-size:14px">평균 주기 28일</b><p id="profilePeriod" style="margin:5px 0 0;color:var(--muted);font-size:11px">평균 생리 기간 5일</p></div>
+    <div class="profile-field"><label for="cycleLength">평균 생리 주기</label><input id="cycleLength" type="number" min="15" max="60" value="28"><small class="muted">생리 시작일부터 다음 생리 시작일까지</small></div>
+    <div class="profile-field"><label for="periodLength">평균 생리 기간</label><input id="periodLength" type="number" min="1" max="10" value="5"><small class="muted">생리가 이어지는 평균 날짜 수</small></div>
+    <button class="btn" id="saveSettings" type="button" style="width:100%;margin-top:8px">주기 설정 저장</button>
+    <div class="profile-section">
+      <h3>생리 시작일 기록</h3>
+      <p>시작한 날짜를 선택하고 저장하면 달력과 예정일에 반영돼요.</p>
+      <div class="row2">
+        <input id="periodStartInput" type="date" aria-label="생리 시작일 선택">
+        <button class="btn" id="addPeriodStart" type="button">날짜 저장</button>
+      </div>
+    </div>
+    <div class="profile-section">
+      <div class="section-title"><h3>지난 기록</h3><span class="muted" id="recordCount">0건</span></div>
+      <div class="records" id="records"><div class="empty-state">아직 저장된 기록이 없어요.</div></div>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn secondary" id="exportBtn" type="button">기록 백업</button>
+      <button class="btn danger" id="clearBtn" type="button">전체 삭제</button>
+    </div>
+    <div class="profile-help">생리 시작일은 언제든 수정하거나 삭제할 수 있어요. 입력한 기록은 이 브라우저에 저장돼요.</div>
+  </aside>
+</div>
+
+<div class="date-edit-backdrop" id="dateEditDialog" role="dialog" aria-modal="true" aria-labelledby="dateEditTitle">
+  <div class="date-edit-panel">
+    <button class="date-edit-close" id="closeDateEdit" type="button" aria-label="닫기">×</button>
+    <h3 id="dateEditTitle">생리 날짜 편집</h3>
+    <p id="dateEditDescription">선택한 날짜를 생리 시작일로 기록할 수 있어요.</p>
+    <label for="calendarEditDate">날짜</label>
+    <input id="calendarEditDate" type="date">
+    <div class="date-edit-actions">
+      <button class="btn secondary" id="cancelDateEdit" type="button">취소</button>
+      <button class="btn" id="saveCalendarDate" type="button">저장</button>
+    </div>
+    <button class="btn danger date-edit-delete" id="deleteCalendarDate" type="button" style="display:none">이 생리 기록 삭제</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=id=>document.getElementById(id);
+const today=new Date(); today.setHours(0,0,0,0);
+const iso=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`};
+const fromISO=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const diffDays=(a,b)=>Math.round((b-a)/86400000);
+const fmt=d=>`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+let data=JSON.parse(localStorage.getItem('dalbit-data')||'{"records":[],"cycle":28,"period":5}');
+if(!Array.isArray(data.sexDates)) data.sexDates=[];
+let view=new Date(today.getFullYear(),today.getMonth(),1);
+function save(){localStorage.setItem('dalbit-data',JSON.stringify(data))}
+function sorted(){return [...data.records].sort((a,b)=>a.start.localeCompare(b.start))}
+function estimates(){
+ const r=sorted(); if(!r.length)return null;
+ const starts=r.map(x=>fromISO(x.start));
+ let cycle=data.cycle;
+ if(starts.length>=2){const gaps=[];for(let i=1;i<starts.length;i++){let g=diffDays(starts[i-1],starts[i]);if(g>=15&&g<=60)gaps.push(g)}if(gaps.length)cycle=Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length)}
+ const last=starts[starts.length-1], next=addDays(last,cycle);
+ const lengths=r.map(x=>x.end?Math.max(1,diffDays(fromISO(x.start),fromISO(x.end))+1):data.period);
+ const period=Math.round(lengths.reduce((a,b)=>a+b,0)/lengths.length)||data.period;
+ return {last,next,cycle,period,ovulation:addDays(next,-14),fertileStart:addDays(next,-19),fertileEnd:addDays(next,-12)};
+}
+function renderCalendar(){
+ $('monthLabel').textContent=`${view.getFullYear()}년 ${view.getMonth()+1}월`;
+ const first=new Date(view.getFullYear(),view.getMonth(),1), total=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+ let out='';for(let i=0;i<first.getDay();i++)out+='<div class="day empty"></div>';
+ const e=estimates(), rec=sorted();
+ for(let n=1;n<=total;n++){
+  const d=new Date(view.getFullYear(),view.getMonth(),n), key=iso(d);
+  let cls='day';
+  if(e){
+   for(const r of rec){const s=fromISO(r.start), end=r.end?fromISO(r.end):addDays(s,data.period-1);if(d>=s&&d<=end)cls+=' period'}
+   let pred=e.next;for(let k=0;k<3;k++){const ps=addDays(pred,k*e.cycle),pe=addDays(ps,e.period-1);if(d>=ps&&d<=pe)cls+=' period'}
+   let fs=e.fertileStart,fe=e.fertileEnd,ov=e.ovulation;
+   for(let k=-1;k<=2;k++){const shift=k*e.cycle;if(d>=addDays(fs,shift)&&d<=addDays(fe,shift))cls+=' fertile';if(key===iso(addDays(ov,shift)))cls+=' ovulation'}
+  }
+  if(key===iso(today))cls+=' today';
+  if(data.sexDates.includes(key))cls+=' sex';
+  out+=`<div class="${cls}" data-date="${key}" aria-label="${key}${data.sexDates.includes(key)?' 관계 기록 있음':''}">${n}</div>`;
+ }
+ $('days').innerHTML=out;
+}
+function render(){
+ const e=estimates(),r=sorted();
+ $('cycleLength').value=data.cycle;$('periodLength').value=data.period;
+ $('profileCycle').textContent=`평균 주기 ${data.cycle}일`;
+ $('profilePeriod').textContent=`평균 생리 기간 ${data.period}일`;
+ if(e){const remaining=diffDays(today,e.next);$('heroTitle').textContent=`${fmt(e.next)} 예정`;$('heroSub').textContent=`배란일 추정 ${fmt(e.ovulation)} · 가임기 추정 ${fmt(e.fertileStart)}~${fmt(e.fertileEnd)}`;$('countdown').innerHTML=`${remaining>=0?remaining:Math.abs(remaining)} <span>${remaining>=0?'일 남음':'일 지남'}</span>`}
+ else{$('heroTitle').textContent='기록을 시작해 주세요';$('heroSub').textContent='최근 생리 시작일을 입력하면 주기를 계산해요.';$('countdown').innerHTML='— <span>일</span>'}
+ $('recordCount').textContent=`${r.length}건`;
+ $('records').innerHTML=r.length?r.slice().reverse().map((x)=>`<div class="period-record"><input type="date" value="${x.start}" data-edit-date="${x.id}" aria-label="생리 시작일 수정"><button class="save-date" data-save-date="${x.id}">수정</button><button class="delete-date" data-delete="${x.id}">삭제</button></div>`).join(''):'<div class="empty-state">아직 저장된 기록이 없어요.</div>';
+ renderCalendar();
+}
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('records').addEventListener('click',ev=>{
+ const del=ev.target.dataset.delete;
+ if(del){data.records=data.records.filter(x=>String(x.id)!==del);save();render();showToast('기록을 삭제했어요.');return}
+ const edit=ev.target.dataset.saveDate;
+ if(edit){const field=$('records').querySelector(`[data-edit-date="${edit}"]`);const next=field?.value;if(!next){showToast('날짜를 선택해 주세요.');return}
+  if(data.records.some(x=>x.start===next&&String(x.id)!==edit)){showToast('이미 등록된 날짜예요.');return}
+  const item=data.records.find(x=>String(x.id)===edit);if(item){item.start=next;item.end='';save();render();showToast('날짜를 수정했어요.')}
+ }
+});
+$('periodStartInput').value=iso(today);
+$('addPeriodStart').onclick=()=>{
+ const start=$('periodStartInput').value;
+ if(!start){showToast('생리 시작일을 선택해 주세요.');return}
+ if(data.records.some(x=>x.start===start)){showToast('이미 등록된 날짜예요.');return}
+ data.records.push({id:Date.now(),start,end:'',flow:'',pain:'',mood:'',memo:''});
+ save();render();showToast('생리 시작일을 저장했어요.');
+};
+const profileDialog=$('profileDialog');
+$('openProfile').onclick=()=>{$('cycleLength').value=data.cycle;$('periodLength').value=data.period;profileDialog.classList.add('open')};
+$('cancelProfile').onclick=()=>profileDialog.classList.remove('open');
+profileDialog.addEventListener('click',ev=>{if(ev.target===profileDialog)profileDialog.classList.remove('open')});
+$('saveSettings').onclick=()=>{const c=Number($('cycleLength').value),p=Number($('periodLength').value);if(c<15||c>60||p<1||p>10){showToast('주기는 15~60일, 생리 기간은 1~10일로 입력해 주세요.');return}data.cycle=c;data.period=p;save();render();profileDialog.classList.remove('open');showToast('내 정보가 저장됐어요.')};
+$('prev').onclick=()=>{view.setMonth(view.getMonth()-1);renderCalendar()};
+$('next').onclick=()=>{view.setMonth(view.getMonth()+1);renderCalendar()};
+let pressTimer=null, pressedDate=null, suppressNextClick=false, editingPeriodId=null;
+const calendar=$('days');
+const dateEditDialog=$('dateEditDialog');
+function closeDateEditor(){dateEditDialog.classList.remove('open');editingPeriodId=null}
+function openDateEditor(date){
+ const chosen=fromISO(date);
+ const existing=data.records.find(r=>{
+  const start=fromISO(r.start);
+  const end=r.end?fromISO(r.end):addDays(start,data.period-1);
+  return chosen>=start&&chosen<=end;
+ });
+ editingPeriodId=existing?String(existing.id):null;
+ $('calendarEditDate').value=existing?existing.start:date;
+ $('dateEditTitle').textContent=existing?'생리 기록 수정':'생리 시작일 기록';
+ $('dateEditDescription').textContent=existing
+  ? '선택한 생리 기록의 시작 날짜를 바꾸거나 기록을 삭제할 수 있어요.'
+  : '이 날짜를 생리 시작일로 등록할 수 있어요.';
+ $('deleteCalendarDate').style.display=existing?'block':'none';
+ dateEditDialog.classList.add('open');
+}
+$('closeDateEdit').onclick=closeDateEditor;
+$('cancelDateEdit').onclick=closeDateEditor;
+dateEditDialog.addEventListener('click',ev=>{if(ev.target===dateEditDialog)closeDateEditor()});
+$('saveCalendarDate').onclick=()=>{
+ const next=$('calendarEditDate').value;
+ if(!next){showToast('날짜를 선택해 주세요.');return}
+ const duplicate=data.records.find(r=>r.start===next&&String(r.id)!==editingPeriodId);
+ if(duplicate){showToast('이미 등록된 생리 시작일이에요.');return}
+ if(editingPeriodId){
+  const item=data.records.find(r=>String(r.id)===editingPeriodId);
+  if(item){item.start=next;item.end='';}
+  showToast('생리 날짜를 수정했어요.');
+ }else{
+  data.records.push({id:Date.now(),start:next,end:'',flow:'',pain:'',mood:'',memo:''});
+  showToast('생리 시작일을 기록했어요.');
+ }
+ save();closeDateEditor();render();
+};
+$('deleteCalendarDate').onclick=()=>{
+ if(!editingPeriodId)return;
+ if(!confirm('이 생리 기록을 삭제할까요?'))return;
+ data.records=data.records.filter(r=>String(r.id)!==editingPeriodId);
+ save();closeDateEditor();render();showToast('생리 기록을 삭제했어요.');
+};
+calendar.addEventListener('pointerdown',ev=>{
+ const cell=ev.target.closest('[data-date]');if(!cell)return;
+ pressedDate=cell.dataset.date;
+ pressTimer=setTimeout(()=>{
+  suppressNextClick=true;
+  const i=data.sexDates.indexOf(pressedDate);
+  if(i>=0){data.sexDates.splice(i,1);showToast('관계 표시를 해제했어요.')}
+  else{data.sexDates.push(pressedDate);showToast('관계한 날로 표시했어요.')}
+  save();renderCalendar();pressTimer=null;
+ },650);
+});
+['pointerup','pointerleave','pointercancel'].forEach(type=>calendar.addEventListener(type,()=>{if(pressTimer)clearTimeout(pressTimer);pressTimer=null}));
+calendar.addEventListener('click',ev=>{
+ const cell=ev.target.closest('[data-date]');
+ if(!cell)return;
+ if(suppressNextClick){suppressNextClick=false;return}
+ openDateEditor(cell.dataset.date);
+});
+calendar.addEventListener('contextmenu',ev=>{if(ev.target.closest('[data-date]'))ev.preventDefault()});
+function showToast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove('show'),2100)}
+$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dalbit-period-backup.json';a.click();URL.revokeObjectURL(url)};
+$('clearBtn').onclick=()=>{if(confirm('저장된 생리 기록과 설정을 모두 삭제할까요?')){data={records:[],cycle:28,period:5,sexDates:[]};save();render()}};
+render();
+</script>
+</body>
+</html>
